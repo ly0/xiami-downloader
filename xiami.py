@@ -17,7 +17,7 @@ import json
 import getopt
 
 username = 'test@yopmail.com'
-password = '19920330'
+password = ''
 axel_opts = '-n5'
 
 def text_validate(text):
