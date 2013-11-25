@@ -5,7 +5,6 @@ Created on Fri Nov  1 20:33:08 2013
 @author: latyas
 """
 
-# NOT FINISHED YET
 
 import xmltodict
 import requests 
