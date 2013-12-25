@@ -5,7 +5,6 @@ Created on Fri Nov  1 20:33:08 2013
 @author: latyas
 """
 
-# NOT FINISHED YET
 
 import xmltodict
 import requests 
@@ -17,7 +16,7 @@ import json
 import getopt
 
 username = 'test2@yopmail.com'
-password = '19920330'
+password = 'password'
 axel_opts = '-n5'
 
 def text_validate(text):
@@ -79,16 +78,6 @@ def login(s):
             'submit':'登 录'
     }
     ret = s.post(login_url,data=data,headers=header)
-'''
-def worker(type):
-    if type == 'songlist':
-    elif type == 'album':
-    elif type == 'single':
-    elif type == 
-    def _worker(*arg):
-        global arg_remove,arg_onefolder
-    return _worker
-'''
 
 
 def download(s,album_type,id):
