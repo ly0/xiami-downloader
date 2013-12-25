@@ -16,7 +16,7 @@ import json
 import getopt
 
 username = 'test2@yopmail.com'
-password = 'password'
+password = 'PASSWORD'
 axel_opts = '-n5'
 
 def text_validate(text):
@@ -106,7 +106,10 @@ def download(s,album_type,id):
             else:
                 folder = 'songlist_%s' % id
 
-            url = xiami(i['location'])
+            if not hq:
+                url = xiami(i['location'])
+            else:
+                url = xiami(json.loads(req.get('http://www.xiami.com/song/gethqsong/sid/' + i['song_id'],headers=header).text)['location'])
             print 'Downloading',i['title']
             if os.path.exists('%s/%s.mp3' % (folder,text_validate(i['title']))):
 
@@ -121,7 +124,10 @@ def download(s,album_type,id):
                 os.system('rm \'%s/%s.mp3\'' % (folder,text_validate(i['title'])))
             os.system('axel -n5 --user-agent="Mozilla/5.0" %s -o \'%s\'' % (url, '%s/%s.mp3' %(folder,text_validate(i['title']))))
     else:
-        url = xiami(data['location'])
+        if not hq:
+            url = xiami(data['location'])
+        else:
+            url = xiami(json.loads(req.get('http://www.xiami.com/song/gethqsong/sid/' + data['song_id'],headers=header).text)['location'])
         folder = 'singles'
 
         if not os.path.exists(folder):
