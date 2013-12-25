@@ -5,6 +5,7 @@ Created on Fri Nov  1 20:33:08 2013
 @author: latyas
 """
 
+# NOT FINISHED YET
 
 import xmltodict
 import requests 
@@ -15,8 +16,8 @@ from BeautifulSoup import BeautifulSoup
 import json
 import getopt
 
-username = 'test@yopmail.com'
-password = ''
+username = 'test2@yopmail.com'
+password = '19920330'
 axel_opts = '-n5'
 
 def text_validate(text):
@@ -59,7 +60,7 @@ def xiami(s):
 
 
 def usage():
-    print '''Usage: %s --type=album/songlist [--remove] [--320k] [--onefolder] listid
+    print '''Usage: %s --type=album/songlist/single [--remove] [--320k] [--onefolder] listid
                  --remove: delete file if existing.
                  --320k: download 320kbps first (VIP needed) 
                  --onefolder: all musics will be downloaded in one folder "songlist_listid", if type equals songlist''' % (sys.argv[0])
@@ -88,54 +89,68 @@ def worker(type):
         global arg_remove,arg_onefolder
     return _worker
 '''
+
+
 def download(s,album_type,id):
     global arg_remove,arg_onefolder
-
-    foo = s.get('http://www.xiami.com/song/playlist/id/%s/type/%s' % (id,album_type),headers={'user-agent':'Mozilla/5.0'}).text
-    data = xmltodict.parse(foo)['playlist']['trackList']['track']
-
+    if album_type != 'single':
+        foo = s.get('http://www.xiami.com/song/playlist/id/%s/type/%s' % (id,album_type),headers={'user-agent':'Mozilla/5.0'}).text
+    else:
+        foo = s.get('http://www.xiami.com/song/playlist/id/%s' % (id),headers={'user-agent':'Mozilla/5.0'}).text
+    data = xmltodict.parse(foo)['playlist']['trackList']['track'] 
     delete_all = arg_remove
     
     if arg_onefolder == True:
         if not os.path.exists('songlist_%s' % id):
             print 'Creating folder'
             os.system('mkdir \'%s\'' % ('songlist_%s' % id))
+    if album_type != 'single':
+        for i in data:
+            if arg_onefolder != True:
+                folder = text_validate(i['album_name'])
+                if not os.path.exists(folder):
+                    print 'Creating folder'
+                    os.system('mkdir \'%s\'' % folder)
+                if not os.path.exists('%s/cover.jpg' % (folder)):
+                    print 'Downloading cover ...'
+                    os.system('curl \'%s\' > \'%s/cover.jpg\'' % (i['pic'].replace('_1',''), folder))          
+            else:
+                folder = 'songlist_%s' % id
 
-    for i in data:
-
-        if arg_onefolder != True:
-            folder = text_validate(i['album_name'])
-
-            if not os.path.exists(folder):
-                print 'Creating folder'
-                os.system('mkdir \'%s\'' % folder)
-            if not os.path.exists('%s/cover.jpg' % (folder)):
-                print 'Downloading cover ...'
-                os.system('curl \'%s\' > \'%s/cover.jpg\'' % (i['pic'].replace('_1',''), folder))           
-        else:
-            folder = 'songlist_%s' % id
-
-        if not hq:
             url = xiami(i['location'])
-        else:
-            url = xiami(json.loads(s.get('http://www.xiami.com/song/gethqsong/sid/' + i['song_id'],headers=header).text)['location'])
-        print 'Downloading',i['title']
-        if os.path.exists('%s/%s.mp3' % (folder,text_validate(i['title']))):
+            print 'Downloading',i['title']
+            if os.path.exists('%s/%s.mp3' % (folder,text_validate(i['title']))):
+
+                if not delete_all:
+                    foofoo = raw_input('%s existed, delete?(for any key jumping, enter yes to delete, enter ALL (upper) to delete all existed)' % i['title'])
+                    if foofoo == 'ALL':
+                       delete_all = True
+                    if foofoo != 'yes' and foofoo != 'ALL':
+                        print '********************** skipped *************************'
+                        continue
+
+                os.system('rm \'%s/%s.mp3\'' % (folder,text_validate(i['title'])))
+            os.system('axel -n5 --user-agent="Mozilla/5.0" %s -o \'%s\'' % (url, '%s/%s.mp3' %(folder,text_validate(i['title']))))
+    else:
+        url = xiami(data['location'])
+        folder = 'singles'
+
+        if not os.path.exists(folder):
+            print 'Creating [singles] folder'
+            os.system('mkdir \'%s\'' % folder)
+            
+        print 'Downloading',data['title']
+        if os.path.exists('%s/%s.mp3' % (folder,text_validate(data['title']))):
 
             if not delete_all:
-                foofoo = raw_input('%s existed, delete?(for any key jumping, enter yes to delete, enter ALL (upper) to delete all existed)' % i['title'])
+                foofoo = raw_input('%s existed, delete?(for any key jumping, enter yes to delete, enter ALL (upper) to delete all existed)' % data['title'])
                 if foofoo == 'ALL':
                    delete_all = True
                 if foofoo != 'yes' and foofoo != 'ALL':
                     print '********************** skipped *************************'
-                    continue
 
-            os.system('rm \'%s/%s.mp3\'' % (folder,text_validate(i['title'])))
-        os.system('axel -n5 --user-agent="Mozilla/5.0" %s -o \'%s\'' % (url, '%s/%s.mp3' %(folder,text_validate(i['title']))))
-
-
-
-
+            os.system('rm \'%s/%s.mp3\'' % (folder,text_validate(data['title'])))
+        os.system('axel -n5 --user-agent="Mozilla/5.0" %s -o \'%s\'' % (url, '%s/%s.mp3' %(folder,text_validate(data['title']))))
 
 if __name__ == '__main__':
     reload(sys)
@@ -160,6 +175,8 @@ if __name__ == '__main__':
                 arg_type = '1'
             elif v == 'songlist':
                 arg_type = '3'
+            elif v == 'single':
+                arg_type = 'single'
             else:
                 exception()
         elif o == '--320k':
