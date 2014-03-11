@@ -5,6 +5,7 @@ Created on Fri Nov  1 20:33:08 2013
 @author: latyas
 """
 
+# NOT FINISHED YET
 
 import xmltodict
 import requests 
@@ -15,7 +16,7 @@ from BeautifulSoup import BeautifulSoup
 import json
 import getopt
 
-username = 'test2@yopmail.com'
+username = 'USERNAME'
 password = 'PASSWORD'
 axel_opts = '-n5'
 
@@ -23,7 +24,8 @@ def text_validate(text):
     return text.replace('\'','').replace('\\','').replace('/','')
 def set_320k(s):
     url = 'http://www.xiami.com/vip/myvip'
-    header = {'user-agent':'Mozilla/5.0'}
+    header = {'user-agent':'Mozilla/5.0',
+              'Referer':'http://img.xiami.com/static/swf/seiya/player.swf?v=1394535902294'}
     ret = s.get(url,headers=header).text
     bs = BeautifulSoup(ret)
     user_id = bs.find('input',attrs={'id':'user_id'}).get('value')
@@ -34,9 +36,9 @@ def set_320k(s):
     ret = s.post('http://www.xiami.com/vip/update-tone',data=data,headers=header)
     ret = json.loads(ret.text)
     if ret['info'] == 'success':
-        print 'Quality of the songs has set to 320kbps.'
+        print 'Qualities of the songs have been set to 320kbps.'
     else:
-        print 'You are not a VIP, songs will be downloaded as normal quality.'
+        print 'You are not a VIP, songs will be downloaded with normal quality.'
  
 def xiami(s):
     start = s.find('h')
@@ -60,9 +62,9 @@ def xiami(s):
 
 def usage():
     print '''Usage: %s --type=album/songlist/single [--remove] [--320k] [--onefolder] listid
-                 --remove: delete file if existing.
-                 --320k: download 320kbps first (VIP needed) 
-                 --onefolder: all musics will be downloaded in one folder "songlist_listid", if type equals songlist''' % (sys.argv[0])
+                 --remove: deletes files if existed.
+                 --320k: downloads 320kbps first (VIP needed) 
+                 --onefolder: all musics will be downloaded into one folder "songlist_listid", if type is songlist''' % (sys.argv[0])
     
 
 def exception():
@@ -114,7 +116,7 @@ def download(s,album_type,id):
             if os.path.exists('%s/%s.mp3' % (folder,text_validate(i['title']))):
 
                 if not delete_all:
-                    foofoo = raw_input('%s existed, delete?(for any key jumping, enter yes to delete, enter ALL (upper) to delete all existed)' % i['title'])
+                    foofoo = raw_input('%s existed, delete?(yes/ALL for files existed/others to skip)' % i['title'])
                     if foofoo == 'ALL':
                        delete_all = True
                     if foofoo != 'yes' and foofoo != 'ALL':
@@ -138,7 +140,7 @@ def download(s,album_type,id):
         if os.path.exists('%s/%s.mp3' % (folder,text_validate(data['title']))):
 
             if not delete_all:
-                foofoo = raw_input('%s existed, delete?(for any key jumping, enter yes to delete, enter ALL (upper) to delete all existed)' % data['title'])
+                foofoo = raw_input('%s existed, delete?(yes/ALL for files existed/others to skip)' % data['title'])
                 if foofoo == 'ALL':
                    delete_all = True
                 if foofoo != 'yes' and foofoo != 'ALL':
@@ -187,7 +189,8 @@ if __name__ == '__main__':
     arg_lists.extend(args)
 
 
-    header = {'user-agent':'Mozilla/5.0'}
+    header = {'user-agent':'Mozilla/5.0',
+			  'Referer':'http://img.xiami.com/static/swf/seiya/player.swf?v=1394535902294'}
     album = sys.argv[1]
     list_type = sys.argv[2]
 
@@ -199,5 +202,5 @@ if __name__ == '__main__':
 
 
     for i in arg_lists:
-        print 'starting download id:%s' % i
+        print 'id:%s' % i
         download(req,arg_type,i)
