@@ -33,8 +33,10 @@ except:
 import json
 import getopt
 
-username = 'test5@yopmail.com'
-password = '19920330'
+# if you wish getting a VIP account, pls contact me.
+
+username = 'USERNAME'
+password = 'PASSWORD'
 axel_opts = '-n5'
 
 
