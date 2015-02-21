@@ -1,6 +1,10 @@
 xiami-downloader
 ================
 
+本项目已不再维护，xiami相关库最新版本在
+https://github.com/ly0/xiami-tools
+
+
 由于调用axel，目前仅支持linux系。本人是axel的脑残粉。
 
 curl有windows版本，同理可以将axel换成curl/aria2c下载, 相信使用 Linux 的您一定可以很轻松的解决.
